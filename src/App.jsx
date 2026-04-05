@@ -2,6 +2,15 @@ import React, { useState } from "react";
 import jsPDF from "jspdf";
 
 export default function App() {
+  const defaultLogo = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Logo_of_the_Ministry_of_Social_Affairs_of_the_Republic_of_Indonesia.svg/960px-Logo_of_the_Ministry_of_Social_Affairs_of_the_Republic_of_Indonesia.svg.png";
+
+  const [kop] = useState({
+    kementerian: "KEMENTERIAN SOSIAL REPUBLIK INDONESIA",
+    dirjen: "DIREKTORAT JENDERAL PERLINDUNGAN DAN JAMINAN SOSIAL",
+    direktorat: "DIREKTORAT PERLINDUNGAN SOSIAL NON KEBENCANAAN",
+    alamat: "Jl. Salemba Raya No. 28 Jakarta Pusat"
+  });
+
   const [rhk, setRhk] = useState("");
   const [judul, setJudul] = useState("");
   const [tanggal, setTanggal] = useState("");
@@ -21,39 +30,24 @@ export default function App() {
 
     if (rhk === "2") {
       tambahan = `
-Kegiatan ini dilaksanakan pada kelompok ${p2k2.kelompok} yang bertempat di rumah ${p2k2.lokasi}. 
-Kegiatan diikuti oleh ${p2k2.jumlah} KPM dengan materi ${p2k2.modul} pada ${p2k2.sesi}.
+Kegiatan dilaksanakan pada kelompok ${p2k2.kelompok || "-"} yang bertempat di rumah ${p2k2.lokasi || "-"}.
+Kegiatan ini diikuti oleh ${p2k2.jumlah || "-"} KPM dengan materi ${p2k2.modul || "-"} pada ${p2k2.sesi || "-"}.
 `;
     }
 
     const text = `
-LAPORAN KEGIATAN
-
 A. PENDAHULUAN
-
-Kegiatan ini dilaksanakan sebagai bagian dari Program Keluarga Harapan (PKH) dalam rangka meningkatkan kesejahteraan masyarakat serta memastikan bantuan sosial tersalurkan secara tepat sasaran.
-
-Adapun tujuan dari kegiatan ini adalah untuk memberikan pemahaman, pendampingan serta memastikan kepatuhan KPM terhadap ketentuan program.
+Kegiatan ini merupakan bagian dari Program Keluarga Harapan (PKH) untuk meningkatkan kesejahteraan masyarakat.
 
 B. KEGIATAN
-
-Pada tanggal ${tanggal}, telah dilaksanakan kegiatan ${judul}.
-
+Dilaksanakan pada tanggal ${tanggal || "-"} kegiatan ${judul || "-"}.
 ${tambahan}
 
-Kegiatan dilaksanakan secara langsung dengan pendekatan persuasif dan edukatif kepada KPM. Seluruh peserta mengikuti kegiatan dengan baik dan menunjukkan antusiasme tinggi.
-
 C. HASIL
+Kegiatan berjalan dengan baik dan memberikan dampak positif bagi peserta.
 
-Hasil dari kegiatan ini menunjukkan bahwa KPM memahami materi yang disampaikan dan mampu menerapkan dalam kehidupan sehari-hari. Selain itu, kegiatan ini juga meningkatkan kesadaran KPM terhadap pentingnya kepatuhan terhadap program bantuan sosial.
-
-D. KESIMPULAN
-
-Kegiatan berjalan dengan lancar dan memberikan dampak positif bagi KPM. Diharapkan kegiatan ini dapat terus dilaksanakan secara berkelanjutan.
-
-E. PENUTUP
-
-Demikian laporan ini dibuat sebagai bentuk pertanggungjawaban pelaksanaan tugas.
+D. PENUTUP
+Demikian laporan ini dibuat sebagai pertanggungjawaban pelaksanaan kegiatan.
 `;
 
     setHasil(text);
@@ -61,21 +55,56 @@ Demikian laporan ini dibuat sebagai bentuk pertanggungjawaban pelaksanaan tugas.
 
   const downloadPDF = () => {
     const doc = new jsPDF();
-    doc.setFont("Times", "Normal");
+
+    // LOGO
+    doc.addImage(defaultLogo, "PNG", 15, 10, 20, 20);
+
+    // KOP
+    doc.setFont("Times", "Bold");
     doc.setFontSize(12);
+    doc.text(kop.kementerian, 105, 15, { align: "center" });
+    doc.text(kop.dirjen, 105, 22, { align: "center" });
+    doc.text(kop.direktorat, 105, 28, { align: "center" });
+
+    doc.setFontSize(8);
+    doc.setFont("Times", "Normal");
+    doc.text(kop.alamat, 105, 34, { align: "center" });
+
+    // GARIS
+    doc.line(15, 38, 195, 38);
+    doc.line(15, 40, 195, 40);
+
+    // JUDUL
+    doc.setFont("Times", "Bold");
+    doc.setFontSize(12);
+    doc.text("LAPORAN PELAKSANAAN TUGAS", 105, 50, { align: "center" });
+
+    // ISI
+    doc.setFont("Times", "Normal");
+    doc.setFontSize(11);
 
     const lines = doc.splitTextToSize(hasil, 180);
-    doc.text(lines, 15, 15);
+    doc.text(lines, 15, 60);
 
     doc.save(`Laporan_RHK_${rhk}.pdf`);
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>APLIKASI LAPORAN PKH</h2>
+    <div style={{ padding: 20, fontFamily: "Times New Roman" }}>
+      
+      {/* KOP TAMPILAN */}
+      <div style={{ textAlign: "center", borderBottom: "3px solid black", marginBottom: 20 }}>
+        <img src={defaultLogo} width="60" />
+        <h3>{kop.kementerian}</h3>
+        <h4>{kop.dirjen}</h4>
+        <h4>{kop.direktorat}</h4>
+        <p>{kop.alamat}</p>
+      </div>
+
+      <h3>APLIKASI LAPORAN PKH</h3>
 
       <select onChange={(e) => setRhk(e.target.value)}>
-        <option value="">Pilih RHK</option>
+        <option>Pilih RHK</option>
         <option value="1">RHK 1</option>
         <option value="2">RHK 2 (P2K2)</option>
         <option value="3">RHK 3</option>
@@ -83,17 +112,13 @@ Demikian laporan ini dibuat sebagai bentuk pertanggungjawaban pelaksanaan tugas.
 
       <br /><br />
 
-      <input
-        placeholder="Judul Kegiatan"
-        onChange={(e) => setJudul(e.target.value)}
-      />
+      <input placeholder="Judul Kegiatan"
+        onChange={(e) => setJudul(e.target.value)} />
 
       <br /><br />
 
-      <input
-        type="date"
-        onChange={(e) => setTanggal(e.target.value)}
-      />
+      <input type="date"
+        onChange={(e) => setTanggal(e.target.value)} />
 
       <br /><br />
 
@@ -134,7 +159,7 @@ Demikian laporan ini dibuat sebagai bentuk pertanggungjawaban pelaksanaan tugas.
         DOWNLOAD PDF
       </button>
 
-      <pre style={{ whiteSpace: "pre-wrap", marginTop: 20 }}>
+      <pre style={{ marginTop: 20, whiteSpace: "pre-wrap" }}>
         {hasil}
       </pre>
     </div>
