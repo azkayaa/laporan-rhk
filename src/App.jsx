@@ -18,47 +18,29 @@ export default function App() {
   const [tanggal, setTanggal] = useState("");
   const [lokasi, setLokasi] = useState("");
   const [isi, setIsi] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  // 🔥 GENERATE AI
-  const generateAI = async () => {
+  // 🔥 GENERATE TANPA AI
+  const generateManual = () => {
     if (!selected) return alert("Pilih kegiatan dulu!");
 
-    setLoading(true);
+    const teks = `
+A. PENDAHULUAN
+Kegiatan ${selected.nama} merupakan bagian dari pelaksanaan Program Keluarga Harapan (PKH) yang bertujuan meningkatkan kesejahteraan masyarakat.
 
-    try {
-      const res = await fetch("/api/ai", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          prompt: `
-Buat laporan resmi PKH dengan format:
+B. KEGIATAN
+Kegiatan dilaksanakan pada tanggal ${tanggal || "-"} bertempat di ${lokasi || "-"} dengan melibatkan KPM PKH dan pihak terkait.
 
-A. Pendahuluan
-B. Kegiatan
-C. Hasil
-D. Penutup
+C. HASIL
+Kegiatan berjalan dengan baik dan lancar sesuai dengan ketentuan yang berlaku serta memberikan dampak positif bagi peserta.
 
-Kegiatan: ${selected.nama}
-Tanggal: ${tanggal}
-Lokasi: ${lokasi}
-`
-        })
-      });
+D. PENUTUP
+Demikian laporan ini dibuat sebagai bentuk pertanggungjawaban pelaksanaan kegiatan.
+`;
 
-      const data = await res.json();
-      setIsi(data.result || "Gagal generate");
-
-    } catch (err) {
-      setIsi("Error koneksi");
-    }
-
-    setLoading(false);
+    setIsi(teks);
   };
 
-  // 🔥 DOWNLOAD PDF
+  // 🔥 PDF
   const downloadPDF = () => {
     if (!selected) return alert("Pilih kegiatan dulu!");
 
@@ -80,7 +62,7 @@ Lokasi: ${lokasi}
 
   return (
     <div style={{ padding: 20, fontFamily: "Arial" }}>
-      <h2>🤖 Generator Laporan PKH AI</h2>
+      <h2>📄 Generator Laporan PKH (Gratis)</h2>
 
       <select onChange={(e) => setSelected(kegiatanList[e.target.value])}>
         <option>Pilih Kegiatan</option>
@@ -102,8 +84,8 @@ Lokasi: ${lokasi}
 
       <br /><br />
 
-      <button onClick={generateAI}>
-        {loading ? "Loading..." : "🤖 Generate AI"}
+      <button onClick={generateManual}>
+        ⚡ Buat Laporan Otomatis
       </button>
 
       <button onClick={downloadPDF} style={{ marginLeft: 10 }}>
