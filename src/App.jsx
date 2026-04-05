@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import jsPDF from "jspdf";
 
 const kegiatanList = [
   { rhk: 1, nama: "Edukasi Penyaluran Bansos" },
@@ -19,32 +20,66 @@ export default function App() {
   const [isi, setIsi] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // 🔥 GENERATE AI
   const generateAI = async () => {
     if (!selected) return alert("Pilih kegiatan dulu!");
 
     setLoading(true);
 
-    const res = await fetch("/api/ai", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        prompt: `Buat laporan kegiatan ${selected.nama} PKH tanggal ${tanggal} di ${lokasi}`
-      })
-    });
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          prompt: `
+Buat laporan resmi PKH dengan format:
 
-    const data = await res.json();
+A. Pendahuluan
+B. Kegiatan
+C. Hasil
+D. Penutup
 
-    const text =
-      data.choices?.[0]?.message?.content || "Gagal generate";
+Kegiatan: ${selected.nama}
+Tanggal: ${tanggal}
+Lokasi: ${lokasi}
+`
+        })
+      });
 
-    setIsi(text);
+      const data = await res.json();
+      setIsi(data.result || "Gagal generate");
+
+    } catch (err) {
+      setIsi("Error koneksi");
+    }
+
     setLoading(false);
   };
 
+  // 🔥 DOWNLOAD PDF
+  const downloadPDF = () => {
+    if (!selected) return alert("Pilih kegiatan dulu!");
+
+    const doc = new jsPDF();
+
+    doc.setFontSize(12);
+    doc.text("KEMENTERIAN SOSIAL REPUBLIK INDONESIA", 20, 20);
+
+    doc.setFontSize(10);
+    doc.text(`Kegiatan: ${selected.nama}`, 20, 40);
+    doc.text(`Tanggal: ${tanggal}`, 20, 50);
+    doc.text(`Lokasi: ${lokasi}`, 20, 60);
+
+    doc.text("Isi Laporan:", 20, 80);
+    doc.text(isi || "-", 20, 90, { maxWidth: 170 });
+
+    doc.save(`RHK-${selected.rhk}.pdf`);
+  };
+
   return (
-    <div style={{ padding: 20 }}>
+    <div style={{ padding: 20, fontFamily: "Arial" }}>
       <h2>🤖 Generator Laporan PKH AI</h2>
 
       <select onChange={(e) => setSelected(kegiatanList[e.target.value])}>
@@ -60,7 +95,10 @@ export default function App() {
 
       <input type="date" onChange={(e) => setTanggal(e.target.value)} />
       <br />
-      <input placeholder="Lokasi" onChange={(e) => setLokasi(e.target.value)} />
+      <input
+        placeholder="Lokasi"
+        onChange={(e) => setLokasi(e.target.value)}
+      />
 
       <br /><br />
 
@@ -68,7 +106,13 @@ export default function App() {
         {loading ? "Loading..." : "🤖 Generate AI"}
       </button>
 
-      <pre>{isi}</pre>
+      <button onClick={downloadPDF} style={{ marginLeft: 10 }}>
+        📄 Download PDF
+      </button>
+
+      <pre style={{ marginTop: 20, whiteSpace: "pre-wrap" }}>
+        {isi}
+      </pre>
     </div>
   );
 }
