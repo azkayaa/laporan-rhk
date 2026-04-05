@@ -20,10 +20,13 @@ export default function App() {
   const [isi, setIsi] = useState("");
 
   const generateIsi = () => {
-    setIsi(`Kegiatan ${selected.nama} telah dilaksanakan pada tanggal ${tanggal} di ${lokasi}. Kegiatan berjalan dengan baik dan sesuai dengan ketentuan.`);
+    if (!selected) return alert("Pilih kegiatan dulu!");
+    setIsi(`Kegiatan ${selected.nama} telah dilaksanakan pada tanggal ${tanggal} di ${lokasi}. Kegiatan berjalan dengan baik dan sesuai ketentuan.`);
   };
 
   const downloadPDF = () => {
+    if (!selected) return alert("Pilih kegiatan dulu!");
+
     const doc = new jsPDF();
 
     doc.text("KEMENTERIAN SOSIAL REPUBLIK INDONESIA", 20, 20);
