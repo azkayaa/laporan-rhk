@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import jsPDF from "jspdf";
+<button onClick={generateIsi}>Buat Isi</button>
 
 const kegiatanList = [
   { rhk: 1, nama: "Edukasi Penyaluran Bansos" },
