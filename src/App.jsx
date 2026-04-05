@@ -17,24 +17,38 @@ export default function App() {
   const [tanggal, setTanggal] = useState("");
   const [lokasi, setLokasi] = useState("");
   const [isi, setIsi] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const generateIsi = () => {
-    if (!selected) {
-      alert("Pilih kegiatan dulu!");
-      return;
-    }
+  const generateAI = async () => {
+    if (!selected) return alert("Pilih kegiatan dulu!");
 
-    setIsi(
-      `Kegiatan ${selected.nama} telah dilaksanakan pada tanggal ${tanggal || "-"} di ${lokasi || "-"}. Kegiatan berjalan dengan baik dan sesuai ketentuan.`
-    );
+    setLoading(true);
+
+    const res = await fetch("/api/ai", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        prompt: `Buat laporan kegiatan ${selected.nama} PKH tanggal ${tanggal} di ${lokasi}`
+      })
+    });
+
+    const data = await res.json();
+
+    const text =
+      data.choices?.[0]?.message?.content || "Gagal generate";
+
+    setIsi(text);
+    setLoading(false);
   };
 
   return (
     <div style={{ padding: 20 }}>
-      <h2>Generator Laporan PKH</h2>
+      <h2>🤖 Generator Laporan PKH AI</h2>
 
       <select onChange={(e) => setSelected(kegiatanList[e.target.value])}>
-        <option value="">Pilih Kegiatan</option>
+        <option>Pilih Kegiatan</option>
         {kegiatanList.map((k, i) => (
           <option key={i} value={i}>
             RHK {k.rhk} - {k.nama}
@@ -46,14 +60,13 @@ export default function App() {
 
       <input type="date" onChange={(e) => setTanggal(e.target.value)} />
       <br />
-      <input
-        placeholder="Lokasi"
-        onChange={(e) => setLokasi(e.target.value)}
-      />
+      <input placeholder="Lokasi" onChange={(e) => setLokasi(e.target.value)} />
 
       <br /><br />
 
-      <button onClick={generateIsi}>Buat Isi</button>
+      <button onClick={generateAI}>
+        {loading ? "Loading..." : "🤖 Generate AI"}
+      </button>
 
       <pre>{isi}</pre>
     </div>
