@@ -13,25 +13,24 @@ export default async function handler(req, res) {
         messages: [
           {
             role: "system",
-            content: "Buat laporan kegiatan PKH yang formal dan rapi."
+            content: "Buat laporan PKH resmi, singkat, rapi, bahasa formal."
           },
           {
             role: "user",
             content: prompt
           }
-        ]
+        ],
+        max_tokens: 500 // 🔥 biar hemat
       })
     });
 
     const data = await response.json();
 
-    // 🔥 ambil hasil text
-    const hasil = data.choices?.[0]?.message?.content || "Gagal ambil hasil AI";
+    const hasil = data.choices?.[0]?.message?.content || "Gagal";
 
     res.status(200).json({ result: hasil });
 
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
     res.status(500).json({ result: "Gagal generate AI" });
   }
 }
