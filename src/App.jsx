@@ -11,10 +11,12 @@ export default function App() {
   const [rhk, setRhk] = useState("");
 
   const [hasil, setHasil] = useState("");
+  const [images, setImages] = useState([]);
+  const [ttd, setTtd] = useState(null);
+
+  const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
   const generate = () => {
-    const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
     const desaList = ["Kebonsari", "Karangrejo", "Karanggadung", "Tegalretno"];
     const kelompokList = ["Kenanga", "Melati", "Mawar", "Anggrek"];
 
@@ -118,17 +120,40 @@ Demikian laporan ini dibuat sebagai pertanggungjawaban pelaksanaan kegiatan.
     setHasil(text);
   };
 
+  // 📸 Upload Foto
+  const handleImage = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImages([...images, reader.result]);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // ✍️ Upload TTD
+  const handleTTD = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      setTtd(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const downloadPDF = () => {
     const doc = new jsPDF();
 
     doc.setFont("Times", "Normal");
-    doc.setFontSize(12);
 
+    // KOP
+    doc.setFontSize(12);
     doc.text("KEMENTERIAN SOSIAL REPUBLIK INDONESIA", 105, 15, { align: "center" });
     doc.text("LAPORAN KEGIATAN PKH", 105, 25, { align: "center" });
 
     doc.line(10, 30, 200, 30);
 
+    // ISI
+    doc.setFontSize(11);
     const lines = doc.splitTextToSize(hasil, 180);
 
     let y = 40;
@@ -137,26 +162,38 @@ Demikian laporan ini dibuat sebagai pertanggungjawaban pelaksanaan kegiatan.
       y += 6;
     });
 
-    doc.text(`Kebumen, ${tanggal || "-"}`, 140, 270);
-    doc.text("Pendamping PKH", 140, 278);
-    doc.text("Arif Heruwanto", 140, 290);
+    // FOTO
+    images.forEach((img) => {
+      doc.addPage();
+      doc.addImage(img, "JPEG", 20, 40, 160, 90);
+    });
+
+    // TTD
+    doc.text(`Kebumen, ${tanggal || "-"}`, 140, 250);
+    doc.text("Pendamping PKH", 140, 258);
+
+    if (ttd) {
+      doc.addImage(ttd, "PNG", 140, 260, 40, 20);
+    }
+
+    doc.text("Arif Heruwanto", 140, 285);
 
     doc.save(`RHK_${rhk}_${judul}.pdf`);
   };
 
   return (
     <div style={{ padding: 20, fontFamily: "Times New Roman" }}>
-      <h2>APLIKASI LAPORAN PKH (DEWA MODE)</h2>
+      <h2>APLIKASI LAPORAN PKH (FINAL PERFECT)</h2>
 
       <input placeholder="Judul Kegiatan" onChange={(e)=>setJudul(e.target.value)} />
       <input type="date" onChange={(e)=>setTanggal(e.target.value)} />
 
       <select onChange={(e)=>setDesa(e.target.value)}>
         <option value="">Pilih Desa</option>
-        <option value="Kebonsari">Kebonsari</option>
-        <option value="Karangrejo">Karangrejo</option>
-        <option value="Karanggadung">Karanggadung</option>
-        <option value="Tegalretno">Tegalretno</option>
+        <option>Kebonsari</option>
+        <option>Karangrejo</option>
+        <option>Karanggadung</option>
+        <option>Tegalretno</option>
       </select>
 
       <input placeholder="Kelompok" onChange={(e)=>setKelompok(e.target.value)} />
@@ -177,6 +214,9 @@ Demikian laporan ini dibuat sebagai pertanggungjawaban pelaksanaan kegiatan.
       </select>
 
       <br /><br />
+
+      📸 Upload Foto: <input type="file" onChange={handleImage} /><br />
+      ✍️ Upload TTD: <input type="file" onChange={handleTTD} /><br /><br />
 
       <button onClick={generate}>⚡ GENERATE</button>
       <button onClick={downloadPDF} style={{ marginLeft: 10 }}>
