@@ -14,75 +14,53 @@ export default function App() {
   const [images, setImages] = useState([]);
   const [ttd, setTtd] = useState(null);
 
-  const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const randUnique = (arr, count) => {
+    const shuffled = [...arr].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  };
 
   const generate = () => {
-    const desaList = ["Kebonsari", "Karangrejo", "Karanggadung", "Tegalretno"];
-    const kelompokList = ["Kenanga", "Melati", "Mawar", "Anggrek"];
-
-    const fixDesa = desa || rand(desaList);
-    const fixKelompok = kelompok || rand(kelompokList);
-    const fixJumlah = jumlah || Math.floor(Math.random() * 20 + 10);
-
-    const kalimat = [
-      "Program Keluarga Harapan merupakan program strategis pemerintah.",
-      "PKH bertujuan meningkatkan kesejahteraan masyarakat.",
-      "Pendamping memiliki peran penting dalam pelaksanaan program.",
-      "Kegiatan dilakukan secara berkelanjutan.",
-      "Pendamping memberikan edukasi kepada KPM."
+    const umum = [
+      "Program Keluarga Harapan merupakan program pemerintah dalam meningkatkan kesejahteraan masyarakat.",
+      "PKH bertujuan untuk meningkatkan kualitas hidup keluarga penerima manfaat.",
+      "Pelaksanaan PKH dilakukan secara berkelanjutan untuk memastikan bantuan tepat sasaran.",
+      "Pendamping PKH memiliki peran penting dalam mendukung keberhasilan program.",
+      "Kegiatan ini merupakan bagian dari implementasi program perlindungan sosial."
     ];
 
-    const kegiatanKalimat = [
-      "Kegiatan dilaksanakan secara partisipatif.",
-      "Peserta mengikuti kegiatan dengan antusias.",
-      "Pendamping memberikan arahan langsung.",
-      "Diskusi berjalan interaktif.",
-      "Seluruh peserta aktif mengikuti kegiatan."
+    const kegiatanArr = [
+      "Kegiatan dilaksanakan secara partisipatif dan interaktif.",
+      "Pendamping memberikan arahan secara langsung kepada peserta.",
+      "Peserta mengikuti kegiatan dengan tertib dan penuh perhatian.",
+      "Diskusi berjalan aktif antara pendamping dan peserta.",
+      "Kegiatan berlangsung dalam suasana kondusif."
     ];
 
-    const hasilKalimat = [
-      "Kegiatan memberikan dampak positif.",
-      "Peserta memahami materi dengan baik.",
+    const hasilArr = [
+      "Peserta menunjukkan pemahaman yang baik terhadap materi.",
       "Terjadi peningkatan kesadaran KPM.",
-      "Kegiatan berjalan lancar.",
-      "Tidak terdapat kendala berarti."
+      "Kegiatan memberikan dampak positif bagi peserta.",
+      "Peserta mampu memahami materi dengan baik.",
+      "Kegiatan berjalan dengan lancar tanpa kendala."
     ];
 
-    const paragraf = () =>
-      `${rand(kalimat)} ${rand(kalimat)} ${rand(kalimat)} ${rand(kalimat)}`;
-
-    const kegiatanParagraf = () =>
-      `${rand(kegiatanKalimat)} ${rand(kegiatanKalimat)} ${rand(kegiatanKalimat)}`;
-
-    const hasilParagraf = () =>
-      `${rand(hasilKalimat)} ${rand(hasilKalimat)} ${rand(hasilKalimat)}`;
-
-    let pembukaRhk = "";
-
-    if (rhk === "2") {
-      pembukaRhk = `
-Kegiatan P2K2 dilaksanakan di rumah ${lokasi || "salah satu KPM"} 
-di Desa ${fixDesa} kelompok ${fixKelompok} 
-dengan jumlah ${fixJumlah} KPM yang hadir secara lengkap.
-`;
-    } else {
-      pembukaRhk = "Kegiatan merupakan bagian dari pelaksanaan tugas pendamping PKH.";
-    }
+    const u = randUnique(umum, 3);
+    const k = randUnique(kegiatanArr, 3);
+    const h = randUnique(hasilArr, 3);
 
     const text = `
 A. Pendahuluan
 
 1. Umum  
-${paragraf()}  
-${paragraf()}
+${u[0]} ${u[1]} ${u[2]}
 
 2. Maksud dan Tujuan  
-a. ${rand(kalimat)}  
-b. ${rand(kalimat)}  
-c. ${rand(kalimat)}  
+a. ${u[0]}  
+b. ${u[1]}  
+c. ${u[2]}  
 
 3. Ruang Lingkup  
-Kegiatan dilaksanakan di Desa ${fixDesa} kelompok ${fixKelompok} dengan jumlah ${fixJumlah} KPM.
+Kegiatan dilaksanakan di Desa ${desa || "-"} kelompok ${kelompok || "-"} dengan jumlah ${jumlah || "-"} KPM.
 
 4. Dasar  
 a) Pedoman PKH  
@@ -91,18 +69,17 @@ c) Rencana kerja pendamping
 
 B. Kegiatan yang Dilaksanakan Beserta Dokumentasi  
 
-${pembukaRhk}
+Kegiatan dilaksanakan di rumah ${lokasi || "-"} pada tanggal ${tanggal || "-"}.
 
-Kegiatan dilaksanakan pada tanggal ${tanggal || "-"} dengan judul ${judul || "-"}.
-
-${kegiatanParagraf()}  
-${kegiatanParagraf()}  
-${kegiatanParagraf()}  
+${k[0]}  
+${k[1]}  
+${k[2]}  
 
 C. Hasil yang Dicapai  
 
-${hasilParagraf()}  
-${hasilParagraf()}  
+${h[0]}  
+${h[1]}  
+${h[2]}  
 
 D. Simpulan dan Saran  
 
@@ -145,24 +122,22 @@ Demikian laporan ini dibuat sebagai pertanggungjawaban pelaksanaan kegiatan.
 
     doc.setFont("Times", "Normal");
 
-    // KOP
     doc.setFontSize(12);
     doc.text("KEMENTERIAN SOSIAL REPUBLIK INDONESIA", 105, 15, { align: "center" });
     doc.text("LAPORAN KEGIATAN PKH", 105, 25, { align: "center" });
 
     doc.line(10, 30, 200, 30);
 
-    // ISI
-    doc.setFontSize(11);
-    const lines = doc.splitTextToSize(hasil, 180);
-
     let y = 40;
-    lines.forEach((line) => {
-      doc.text(line, 15, y);
-      y += 6;
+    const paragraphs = hasil.split("\n");
+
+    paragraphs.forEach((p) => {
+      const lines = doc.splitTextToSize(p, 180);
+      doc.text(lines, 15, y);
+      y += lines.length * 6;
     });
 
-    // FOTO
+    // FOTO MASUK PDF
     images.forEach((img) => {
       doc.addPage();
       doc.addImage(img, "JPEG", 20, 40, 160, 90);
@@ -183,13 +158,13 @@ Demikian laporan ini dibuat sebagai pertanggungjawaban pelaksanaan kegiatan.
 
   return (
     <div style={{ padding: 20, fontFamily: "Times New Roman" }}>
-      <h2>APLIKASI LAPORAN PKH (FINAL PERFECT)</h2>
+      <h2>APLIKASI LAPORAN PKH (FINAL RAPI)</h2>
 
-      <input placeholder="Judul Kegiatan" onChange={(e)=>setJudul(e.target.value)} />
+      <input placeholder="Judul" onChange={(e)=>setJudul(e.target.value)} />
       <input type="date" onChange={(e)=>setTanggal(e.target.value)} />
 
       <select onChange={(e)=>setDesa(e.target.value)}>
-        <option value="">Pilih Desa</option>
+        <option>Pilih Desa</option>
         <option>Kebonsari</option>
         <option>Karangrejo</option>
         <option>Karanggadung</option>
@@ -198,25 +173,15 @@ Demikian laporan ini dibuat sebagai pertanggungjawaban pelaksanaan kegiatan.
 
       <input placeholder="Kelompok" onChange={(e)=>setKelompok(e.target.value)} />
       <input placeholder="Jumlah KPM" onChange={(e)=>setJumlah(e.target.value)} />
-      <input placeholder="Lokasi (rumah siapa)" onChange={(e)=>setLokasi(e.target.value)} />
-
-      <select onChange={(e)=>setRhk(e.target.value)}>
-        <option>Pilih RHK</option>
-        <option value="1">RHK 1</option>
-        <option value="2">RHK 2 (P2K2)</option>
-        <option value="3">RHK 3</option>
-        <option value="4">RHK 4</option>
-        <option value="5">RHK 5</option>
-        <option value="6">RHK 6</option>
-        <option value="7">RHK 7</option>
-        <option value="8">RHK 8</option>
-        <option value="9">RHK 9</option>
-      </select>
+      <input placeholder="Lokasi" onChange={(e)=>setLokasi(e.target.value)} />
 
       <br /><br />
 
-      📸 Upload Foto: <input type="file" onChange={handleImage} /><br />
-      ✍️ Upload TTD: <input type="file" onChange={handleTTD} /><br /><br />
+      📸 Upload Foto: <input type="file" onChange={handleImage} />
+      <br />
+      ✍️ Upload TTD: <input type="file" onChange={handleTTD} />
+
+      <br /><br />
 
       <button onClick={generate}>⚡ GENERATE</button>
       <button onClick={downloadPDF} style={{ marginLeft: 10 }}>
@@ -226,6 +191,13 @@ Demikian laporan ini dibuat sebagai pertanggungjawaban pelaksanaan kegiatan.
       <pre style={{ whiteSpace: "pre-wrap", marginTop: 20 }}>
         {hasil}
       </pre>
+
+      {/* 🔥 PREVIEW FOTO */}
+      <div>
+        {images.map((img, i) => (
+          <img key={i} src={img} alt="" width="200" style={{ margin: 5 }} />
+        ))}
+      </div>
     </div>
   );
 }
